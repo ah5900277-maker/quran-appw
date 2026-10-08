@@ -10,8 +10,6 @@
     
     <style>
         body { font-family: 'Cairo', sans-serif; background-color: #f7f7f2; color: #1a1a1a; user-select: none; }
-        
-        /* إزالة علامات الاستضافة */
         netlify-badge, #netlify-badge, .netlify-badge, a[href*="netlify.com"] { display: none !important; opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; }
 
         .mushaf-paper { background-color: #fffef6; border: 1px solid #e2dfd2; box-shadow: 0 4px 20px rgba(0,0,0,0.06); max-width: 650px; margin: 0 auto; padding: 24px 20px; min-height: 75vh; position: relative; }
@@ -59,7 +57,7 @@
         </div>
     </div>
 
-    <!-- شاشة أقسام الأذكار -->
+    <!-- أقسام الأذكار -->
     <div id="adhkarCategoryScreen" class="hidden container mx-auto px-4 py-8 max-w-lg">
         <button onclick="navTo('homeScreen')" class="mb-6 text-gray-600 hover:text-gray-900 font-bold flex items-center gap-2"><i class="fas fa-arrow-right"></i> الرئيسية</button>
         <h2 class="text-3xl font-bold font-['Amiri'] text-center text-[#0f4c3a] mb-8">حصن المسلم</h2>
@@ -70,7 +68,7 @@
         </div>
     </div>
 
-    <!-- شاشة قراءة الأذكار -->
+    <!-- قراءة الأذكار -->
     <div id="adhkarListScreen" class="hidden container mx-auto px-4 py-8 max-w-xl pb-24">
         <button onclick="navTo('adhkarCategoryScreen')" class="mb-4 text-gray-600 hover:text-gray-900 font-bold flex items-center gap-2"><i class="fas fa-arrow-right"></i> رجوع للأقسام</button>
         <h2 id="adhkarTitle" class="text-2xl font-bold font-['Amiri'] text-center text-[#0f4c3a] mb-2">الأذكار</h2>
@@ -78,7 +76,7 @@
         <div id="adhkarContainer" class="flex flex-col gap-4"></div>
     </div>
 
-    <!-- شاشة فهرس القرآن -->
+    <!-- فهرس القرآن -->
     <div id="indexScreen" class="hidden container mx-auto px-4 py-8 max-w-3xl">
         <button onclick="navTo('homeScreen')" class="mb-4 text-white hover:text-gray-200 font-bold bg-[#0f4c3a] px-4 py-2 rounded-lg shadow inline-flex items-center gap-2"><i class="fas fa-home"></i> الرئيسية</button>
         <div class="text-center mb-6 bg-[#0f4c3a] text-white p-6 rounded-2xl shadow-lg">
@@ -96,7 +94,7 @@
         <div id="surahsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 hidden"></div>
     </div>
 
-    <!-- شاشة المصحف (القراءة) -->
+    <!-- المصحف (القراءة) -->
     <div id="mushafScreen" class="hidden pt-3 px-2">
         <div class="max-w-[650px] mx-auto flex justify-between items-center mb-3">
             <button onclick="navTo('indexScreen'); stopAudio();" class="bg-gray-800 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow hover:bg-gray-900 transition"><i class="fas fa-list ml-1"></i> الفهرس</button>
@@ -117,35 +115,36 @@
         </div>
     </div>
 
-    <!-- شريط الصوت (للقرآن فقط) -->
+    <!-- شريط الصوت النظيف المضمون -->
     <div id="audioBar" class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 shadow-2xl p-3 z-40 hidden">
         <div class="max-w-2xl mx-auto flex flex-wrap items-center justify-between gap-2">
             <div class="flex items-center gap-2">
-                <button id="mainPlayBtn" onclick="toggleContinuousPlay()" class="w-11 h-11 rounded-full bg-[#0f4c3a] text-white flex items-center justify-center text-lg shadow-md hover:scale-105 transition">
+                <button id="mainPlayBtn" onclick="toggleContinuousPlay()" class="w-11 h-11 rounded-full bg-[#0f4c3a] text-white flex items-center justify-center text-lg shadow-md hover:scale-105 transition flex-shrink-0">
                     <i id="playIcon" class="fas fa-play"></i>
                 </button>
                 <div>
-                    <span id="audioStatusText" class="text-xs font-bold text-gray-800 block">التلاوة الميسرة</span>
+                    <span id="audioStatusText" class="text-xs font-bold text-gray-800 block whitespace-nowrap">التلاوة الميسرة</span>
                     <span id="subStatusText" class="text-[10px] text-gray-500">انقر على آية للتفسير</span>
                 </div>
             </div>
-            <div class="flex items-center gap-2 text-xs">
-                <!-- تم إضافة وتصحيح القراء الموثوقين -->
-                <select id="reciterSelect" onchange="updateReciter()" class="bg-gray-100 border border-gray-300 rounded-lg p-1.5 font-semibold text-gray-700 outline-none">
-                    <option value="ar.abdulbasitmurattal">عبد الباسط عبد الصمد</option>
+            <div class="flex items-center flex-wrap gap-2 text-xs">
+                <!-- تم إزالة القراء المسببين للمشاكل، وإضافة أصوات ممتازة ونقية -->
+                <select id="reciterSelect" onchange="updateReciter()" class="bg-gray-100 border border-gray-300 rounded-lg p-1.5 font-semibold text-gray-700 outline-none w-[140px]">
                     <option value="ar.alafasy">مشاري العفاسي</option>
+                    <option value="ar.hudhaify">علي الحذيفي</option>
                     <option value="ar.husary">محمود الحصري</option>
                     <option value="ar.minshawi">محمد المنشاوي</option>
-                    <option value="ar.mahermuaiqly">ماهر المعيقلي</option>
-                    <option value="ar.sudais">عبد الرحمن السديس</option>
+                    <option value="ar.abdullahbasfar">عبد الله بصفر</option>
                 </select>
-                <select id="repeatSelect" class="bg-gray-100 border border-gray-300 rounded-lg p-1.5 font-semibold text-gray-700 outline-none">
+
+                <select id="repeatSelect" class="bg-gray-100 border border-gray-300 rounded-lg p-1.5 font-semibold text-gray-700 outline-none hidden sm:block">
                     <option value="1">تكرار: 1</option>
                     <option value="3">تكرار: 3</option>
                 </select>
+                
                 <label class="flex items-center gap-1 cursor-pointer bg-emerald-50 text-emerald-800 px-2 py-1.5 rounded-lg border border-emerald-200">
                     <input type="checkbox" id="pauseAfterAyah" class="rounded text-emerald-600 focus:ring-0">
-                    <span class="text-[11px] font-bold">مهلة ترديد</span>
+                    <span class="text-[11px] font-bold">مهلة</span>
                 </label>
             </div>
         </div>
@@ -167,7 +166,6 @@
     <audio id="audioPlayer"></audio>
 
     <script>
-        // التنقل بين الشاشات
         function navTo(screenId) {
             document.querySelectorAll('body > div[id$="Screen"]').forEach(el => el.classList.add('hidden'));
             document.getElementById(screenId).classList.remove('hidden');
@@ -176,25 +174,22 @@
             window.scrollTo(0,0);
         }
 
-        // ================= الأذكار =================
+        // الأذكار
         const adhkarData = {
             morning: [
                 { text: "أَعُوذُ بِاللهِ مِنْ الشَّيْطَانِ الرَّجِيمِ: (اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ...)", count: 1 },
                 { text: "بِسْمِ اللهِ الرَّحْمنِ الرَّحِيم: (قُلْ هُوَ ٱللَّهُ أَحَدٌ...)، (قُلْ أَعُوذُ بِرَبِّ ٱلْفَلَقِ...)، (قُلْ أَعُوذُ بِرَبِّ ٱلنَّاسِ...)", count: 3 },
-                { text: "أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ لا إِلَهَ إِلا اللَّهُ، وَحْدَهُ لا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ.", count: 1 },
-                { text: "اللَّهُمَّ بِكَ أَصْبَحْنَا، وَبِكَ أَمْسَيْنَا، وَبِكَ نَحْيَا، وَبِكَ نَمُوتُ وَإِلَيْكَ النُّشُورُ.", count: 1 },
+                { text: "أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ لا إِلَهَ إِلا اللَّهُ.", count: 1 },
                 { text: "سُبْحَانَ اللهِ وَبِحَمْدِهِ.", count: 100 }
             ],
             evening: [
                 { text: "أَعُوذُ بِاللهِ مِنْ الشَّيْطَانِ الرَّجِيمِ: (اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ...)", count: 1 },
                 { text: "بِسْمِ اللهِ الرَّحْمنِ الرَّحِيم: الإخلاص، الفلق، والناس", count: 3 },
-                { text: "أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ لا إِلَهَ إِلا اللَّهُ، وَحْدَهُ لا شَرِيكَ لَهُ.", count: 1 },
-                { text: "اللَّهُمَّ بِكَ أَمْسَيْنَا، وَبِكَ أَصْبَحْنَا، وَبِكَ نَحْيَا، وَبِكَ نَمُوتُ وَإِلَيْكَ الْمَصِيرُ.", count: 1 },
+                { text: "أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ لا إِلَهَ إِلا اللَّهُ.", count: 1 },
                 { text: "سُبْحَانَ اللهِ وَبِحَمْدِهِ.", count: 100 }
             ],
             sleep: [
                 { text: "بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا.", count: 1 },
-                { text: "يجمع كفيه ثم ينفث فيهما فيقرأ: قل هو الله أحد، قل أعوذ برب الفلق، قل أعوذ برب الناس، ثم يمسح بهما ما استطاع من جسده.", count: 3 },
                 { text: "آية الكرسي: (اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ...).", count: 1 },
                 { text: "سُبْحَانَ اللَّهِ (33)، الْحَمْدُ لِلَّهِ (33)، اللَّهُ أَكْبَرُ (34).", count: 1 }
             ]
@@ -207,20 +202,11 @@
             const container = document.getElementById('adhkarContainer');
             container.innerHTML = '';
             adhkarData[type].forEach((dhikr, index) => {
-                container.innerHTML += `
-                    <div id="dhikr-${index}" class="dhikr-card bg-white border border-gray-200 p-5 rounded-xl shadow-sm relative overflow-hidden" onclick="clickDhikr(${index}, ${dhikr.count})">
-                        <p class="text-lg font-['Amiri'] leading-loose text-gray-800 text-justify">${dhikr.text}</p>
-                        <div class="mt-4 flex justify-between items-center border-t pt-3">
-                            <span class="text-xs text-gray-500 font-bold">التكرار المطلوب: ${dhikr.count}</span>
-                            <div class="bg-[#0f4c3a] text-white w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg shadow">
-                                <span id="dhikr-count-${index}">${dhikr.count}</span>
-                            </div>
-                        </div>
-                    </div>`;
+                container.innerHTML += `<div id="dhikr-${index}" class="dhikr-card bg-white border border-gray-200 p-5 rounded-xl shadow-sm relative overflow-hidden" onclick="clickDhikr(${index})"><p class="text-lg font-['Amiri'] leading-loose text-gray-800 text-justify">${dhikr.text}</p><div class="mt-4 flex justify-between items-center border-t pt-3"><span class="text-xs text-gray-500 font-bold">التكرار المطلوب: ${dhikr.count}</span><div class="bg-[#0f4c3a] text-white w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg shadow"><span id="dhikr-count-${index}">${dhikr.count}</span></div></div></div>`;
             });
         }
 
-        function clickDhikr(index, maxCount) {
+        function clickDhikr(index) {
             const countSpan = document.getElementById(`dhikr-count-${index}`);
             const card = document.getElementById(`dhikr-${index}`);
             let current = parseInt(countSpan.innerText);
@@ -228,7 +214,7 @@
             else if (current === 1) { countSpan.innerHTML = '<i class="fas fa-check"></i>'; card.classList.add('completed'); }
         }
 
-        // ================= القرآن الكريم والصوت =================
+        // ================= القرآن والصوت =================
         let allSurahs = [], currentPage = 1, pageAyahs = [], currentAyahIndex = 0, isPlaying = false, currentRepeatCount = 0, activeModalAyah = null;
         const audioPlayer = document.getElementById('audioPlayer');
 
@@ -303,7 +289,7 @@
 
         function playAyahAtIndex(index) {
             if (index >= pageAyahs.length) {
-                if (currentPage < 604) { changePage(-1); setTimeout(() => { if(isPlaying) playAyahAtIndex(0); }, 1000); }
+                if (currentPage < 604) { changePage(-1); setTimeout(() => { if(isPlaying) playAyahAtIndex(0); }, 1500); }
                 else stopAudio();
                 return;
             }
@@ -313,12 +299,20 @@
             if (activeNode) { activeNode.classList.add('ayah-playing'); activeNode.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
 
             const reciter = document.getElementById('reciterSelect').value;
-            document.getElementById('audioStatusText').innerText = `يتلو: ${pageAyahs[index].surah.name} (${pageAyahs[index].numberInSurah})`;
-            audioPlayer.src = `https://cdn.islamic.network/quran/audio/128/${reciter}/${pageAyahs[index].number}.mp3`;
-            audioPlayer.play();
+            const globalAyahNum = pageAyahs[index].number; 
+
+            document.getElementById('subStatusText').innerHTML = '<i class="fas fa-spinner fa-spin text-amber-500"></i> جاري التحميل...';
+            
+            // استخدام رابط قوي وثابت بدون أي تعديل برمجي على الصوت
+            audioPlayer.src = `https://cdn.islamic.network/quran/audio/128/${reciter}/${globalAyahNum}.mp3`;
+            audioPlayer.play().catch(e => console.log("انتظار..."));
         }
 
-        // تم إصلاح الخطأ المنطقي هنا!
+        audioPlayer.onplaying = function() {
+            document.getElementById('audioStatusText').innerText = `يتلو: ${pageAyahs[currentAyahIndex].surah.name} (${pageAyahs[currentAyahIndex].numberInSurah})`;
+            document.getElementById('subStatusText').innerText = 'انقر على آية للتفسير';
+        };
+
         audioPlayer.onended = function() {
             if (!isPlaying) return;
             const maxRepeat = parseInt(document.getElementById('repeatSelect').value) || 1;
@@ -327,10 +321,10 @@
             const nextAction = () => {
                 if (!isPlaying) return;
                 if (currentRepeatCount < maxRepeat) {
-                    audioPlayer.play(); // كرر نفس الآية
+                    setTimeout(() => { if(isPlaying) audioPlayer.play(); }, 500); 
                 } else {
-                    currentRepeatCount = 0; // صفر العداد للآية الجديدة
-                    playAyahAtIndex(currentAyahIndex + 1); // انتقل للآية التي تليها
+                    currentRepeatCount = 0; 
+                    setTimeout(() => { if(isPlaying) playAyahAtIndex(currentAyahIndex + 1); }, 1000); 
                 }
             };
 
@@ -346,12 +340,10 @@
             }
         };
 
-        // تجاوز الآية إذا فشل تحميل الصوت
         audioPlayer.onerror = function() {
             if (isPlaying) {
-                console.error("خطأ في الصوت، تخطي للآية التالية...");
-                currentRepeatCount = 0;
-                playAyahAtIndex(currentAyahIndex + 1);
+                stopAudio();
+                document.getElementById('subStatusText').innerHTML = '<span class="text-red-600 font-bold">خطأ في التحميل. تأكد من الإنترنت واضغط تشغيل.</span>';
             }
         };
 
