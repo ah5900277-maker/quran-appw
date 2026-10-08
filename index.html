@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المصحف الجامع - قراءة، تدبر، وتحفيظ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #f7f7f2; color: #1a1a1a; user-select: none; }
+        
+        /* إزالة أي علامات ترويجية تلقائياً */
+        netlify-badge, #netlify-badge, .netlify-badge, a[href*="netlify.com"] {
+            display: none !important; opacity: 0 !important; visibility: hidden !important; pointer-events: none !important;
+        }
+
+        .mushaf-paper {
+            background-color: #fffef6;
+            border: 1px solid #e2dfd2;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            max-width: 650px;
+            margin: 0 auto;
+            padding: 24px 20px;
+            min-height: 75vh;
+            position: relative;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: 'Amiri', serif;
+            font-size: 17px;
+            font-weight: bold;
+            border-bottom: 2px solid #2d3748;
+            padding-bottom: 6px;
+            margin-bottom: 18px;
+            color: #2d3748;
+        }
+
+        .quran-text {
+            font-family: 'Amiri Quran', serif;
+            font-size: 25px;
+            line-height: 2.35;
+            text-align: justify;
+            text-justify: inter-word;
+        }
+
+        .surah-frame {
+            text-align: center;
+            font-family: 'Amiri', serif;
+            font-size: 22px;
+            font-weight: bold;
+            background: repeating-linear-gradient(45deg, #eee8d5, #eee8d5 10px, #fbf7ea 10px, #fbf7ea 20px);
+            border: 2px solid #4a5568;
+            padding: 8px;
+            margin: 16px 0;
+            border-radius: 4px;
+        }
+
+        .bismillah-box {
+            text-align: center;
+            font-size: 26px;
+            margin-bottom: 12px;
+            font-family: 'Amiri Quran', serif;
+            display: block;
+        }
+
+        .ayah-span {
+            cursor: pointer;
+            border-radius: 5px;
+            padding: 2px 3px;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .ayah-span:hover {
+            background-color: #fef9c3;
+        }
+
+        .ayah-playing {
+            background-color: #bbf7d0 !important;
+            color: #064e3b;
+            font-weight: bold;
+        }
+
+        .ayah-number {
+            color: #8b0000;
+            font-size: 19px;
+            margin: 0 4px;
+            display: inline-block;
+        }
+
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #0f4c3a;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            animation: spin 1s linear infinite;
+            margin: 40px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .modal-drawer {
+            transition: transform 0.3s ease-out;
+            transform: translateY(100%);
+        }
+        .modal-drawer.active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="pb-36">
+
+    <!-- شاشة الفهرس والختمة -->
+    <div id="indexScreen" class="container mx-auto px-4 py-8 max-w-3xl">
+        <div class="text-center mb-6 bg-[#0f4c3a] text-white p-6 rounded-2xl shadow-lg relative overflow-hidden">
+            <h1 class="text-3xl font-bold font-['Amiri'] mb-1">المصحف الجامع</h1>
+            <p class="text-xs text-gray-200">منصة القراءة، التحفيظ، والتدبر الميسر</p>
+            
+            <!-- بطاقة تقدم الختمة -->
+            <div id="khatmahCard" class="mt-5 bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20 flex flex-col sm:flex-row justify-between items-center gap-3">
+                <div class="text-right">
+                    <span class="text-xs text-yellow-300 font-bold block">متابعة الختمة</span>
+                    <span id="khatmahLabel" class="text-sm font-semibold">الصفحة 1 من 604 (0.2%)</span>
+                </div>
+                <button onclick="resumeBookmark()" class="bg-[#d4af37] hover:bg-[#c49f27] text-gray-900 px-4 py-2 rounded-lg font-bold text-xs shadow-md transition flex items-center gap-2">
+                    <i class="fas fa-bookmark"></i> واصل من حيث توقفت
+                </button>
+            </div>
+        </div>
+
+        <input type="text" id="searchInput" onkeyup="searchSurah()" placeholder="ابحث باسم السورة..." class="w-full px-5 py-3 rounded-xl border-2 border-gray-300 focus:border-[#0f4c3a] outline-none mb-5 text-base shadow-sm">
+        
+        <div id="listLoader" class="loader"></div>
+        <div id="surahsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 hidden"></div>
+    </div>
+
+    <!-- شاشة المصحف والقراءة -->
+    <div id="mushafScreen" class="hidden pt-3 px-2">
+        <div class="max-w-[650px] mx-auto flex justify-between items-center mb-3">
+            <button onclick="showIndex()" class="bg-gray-800 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow hover:bg-gray-900 transition">
+                <i class="fas fa-list ml-1"></i> الفهرس
+            </button>
+            
+            <button onclick="saveCurrentBookmark()" class="bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow transition flex items-center gap-1">
+                <i class="fas fa-bookmark"></i> حفظ الفاصل
+            </button>
+
+            <div class="flex gap-1.5">
+                <button onclick="changePage(1)" class="bg-[#0f4c3a] text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow hover:bg-[#0c3b2d]">السابق</button>
+                <button onclick="changePage(-1)" class="bg-[#0f4c3a] text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow hover:bg-[#0c3b2d]">التالي</button>
+            </div>
+        </div>
+
+        <!-- ورقة المصحف -->
+        <div class="mushaf-paper">
+            <div class="page-header">
+                <span id="headerJuz">الجزء 1</span>
+                <span id="headerPage">1</span>
+                <span id="headerSurah">سورة الفاتحة</span>
+            </div>
+            <div id="pageLoader" class="loader hidden"></div>
+            <div id="mushafText" class="quran-text"></div>
+        </div>
+    </div>
+
+    <!-- شريط التحكم الصوتي العائم (التحفيظ والتشغيل) -->
+    <div id="audioBar" class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 shadow-2xl p-3 z-40 hidden">
+        <div class="max-w-2xl mx-auto flex flex-wrap items-center justify-between gap-2">
+            
+            <div class="flex items-center gap-2">
+                <button id="mainPlayBtn" onclick="toggleContinuousPlay()" class="w-11 h-11 rounded-full bg-[#0f4c3a] text-white flex items-center justify-center text-lg shadow-md hover:scale-105 transition">
+                    <i id="playIcon" class="fas fa-play"></i>
+                </button>
+                <div>
+                    <span id="audioStatusText" class="text-xs font-bold text-gray-800 block">التلاوة الميسرة</span>
+                    <span id="subStatusText" class="text-[10px] text-gray-500">انقر على أي آية للتدبر</span>
+                </div>
+            </div>
+
+            <!-- خيارات القارئ والتكرار -->
+            <div class="flex items-center gap-2 text-xs">
+                <select id="reciterSelect" onchange="updateReciter()" class="bg-gray-100 border border-gray-300 rounded-lg p-1.5 font-semibold text-gray-700 outline-none">
+                    <option value="ar.alafasy">مشاري العفاسي</option>
+                    <option value="ar.husary">محمود الحصري</option>
+                    <option value="ar.minshawi">محمد المنشاوي</option>
+                    <option value="ar.abdulbasitmurattal">عبد الباسط عبد الصمد</option>
+                </select>
+
+                <select id="repeatSelect" class="bg-gray-100 border border-gray-300 rounded-lg p-1.5 font-semibold text-gray-700 outline-none">
+                    <option value="1">تكرار: 1</option>
+                    <option value="3">تكرار: 3</option>
+                    <option value="5">تكرار: 5</option>
+                </select>
+
+                <label class="flex items-center gap-1 cursor-pointer bg-emerald-50 text-emerald-800 px-2 py-1.5 rounded-lg border border-emerald-200">
+                    <input type="checkbox" id="pauseAfterAyah" class="rounded text-emerald-600 focus:ring-0">
+                    <span class="text-[11px] font-bold">مهلة الترديد</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- درج منبثق للتفسير والتدبر السريع -->
+    <div id="drawerOverlay" onclick="closeDrawer()" class="fixed inset-0 bg-black/40 z-50 hidden transition-opacity"></div>
+    <div id="tafsirDrawer" class="modal-drawer fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-2xl p-5 z-50 max-w-xl mx-auto max-h-[75vh] flex flex-col">
+        <div class="flex justify-between items-center border-b pb-3 mb-3">
+            <div>
+                <span id="drawerSurahAyah" class="text-sm font-bold text-[#0f4c3a]">سورة الفاتحة - آية 1</span>
+                <span class="text-xs text-gray-500 block">التفسير الميسر</span>
+            </div>
+            <button onclick="closeDrawer()" class="text-gray-400 hover:text-gray-600 text-lg p-1">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="overflow-y-auto pr-1 flex-1 text-sm text-gray-700 leading-relaxed" id="drawerContent">
+            <div class="loader"></div>
+        </div>
+
+        <div class="pt-3 border-t mt-3 flex justify-end gap-2">
+            <button onclick="playDrawerAyah()" class="bg-[#0f4c3a] text-white px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow">
+                <i class="fas fa-volume-up"></i> استمع للآية
+            </button>
+        </div>
+    </div>
+
+    <audio id="audioPlayer"></audio>
+
+    <script>
+        // إزالة مستمرة لأي علامات ترويجية
+        setInterval(() => {
+            document.querySelectorAll('a[href*="netlify.com"], netlify-badge').forEach(el => el.remove());
+        }, 800);
+
+        let allSurahs = [];
+        let currentPage = 1;
+        let pageAyahs = [];
+        let currentAyahIndex = 0;
+        let isPlaying = false;
+        let currentRepeatCount = 0;
+        let activeModalAyah = null;
+
+        const audioPlayer = document.getElementById('audioPlayer');
+
+        async function fetchSurahs() {
+            try {
+                const res = await fetch('https://api.alquran.cloud/v1/surah');
+                const data = await res.json();
+                allSurahs = data.data;
+                renderSurahs(allSurahs);
+                loadBookmarkInfo();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function renderSurahs(surahs) {
+            const grid = document.getElementById('surahsGrid');
+            grid.innerHTML = '';
+            surahs.forEach(s => {
+                grid.innerHTML += `
+                    <div onclick="openSurah(${s.number})" class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-200 hover:border-[#0f4c3a] cursor-pointer flex justify-between items-center transition">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-[#0f4c3a] text-white flex items-center justify-center font-bold text-xs">${s.number}</div>
+                            <h3 class="font-bold font-['Amiri'] text-lg text-gray-800">${s.name}</h3>
+                        </div>
+                        <span class="text-xs text-gray-400">${s.numberOfAyahs} آية</span>
+                    </div>`;
+            });
+            document.getElementById('listLoader').classList.add('hidden');
+            grid.classList.remove('hidden');
+        }
+
+        function searchSurah() {
+            const q = document.getElementById('searchInput').value;
+            renderSurahs(allSurahs.filter(s => s.name.includes(q)));
+        }
+
+        async function openSurah(surahNumber) {
+            document.getElementById('indexScreen').classList.add('hidden');
+            document.getElementById('mushafScreen').classList.remove('hidden');
+            document.getElementById('audioBar').classList.remove('hidden');
+            try {
+                const res = await fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}`);
+                const data = await res.json();
+                loadPage(data.data.ayahs[0].page);
+            } catch (err) { console.error(err); }
+        }
+
+        async function loadPage(pageNum) {
+            if (pageNum < 1 || pageNum > 604) return;
+            currentPage = pageNum;
+            stopAudio();
+
+            document.getElementById('mushafText').innerHTML = '';
+            document.getElementById('pageLoader').classList.remove('hidden');
+
+            try {
+                const res = await fetch(`https://api.alquran.cloud/v1/page/${pageNum}/quran-uthmani`);
+                const data = await res.json();
+                pageAyahs = data.data.ayahs;
+                currentAyahIndex = 0;
+
+                document.getElementById('headerPage').innerText = pageNum;
+                document.getElementById('headerJuz').innerText = `الجزء ${pageAyahs[0].juz}`;
+                document.getElementById('headerSurah').innerText = pageAyahs[0].surah.name;
+
+                let html = '';
+                pageAyahs.forEach((ayah, idx) => {
+                    let rawText = ayah.text;
+                    let hasBismillah = false;
+                    let bismillahText = '';
+
+                    if (ayah.numberInSurah === 1) {
+                        html += `<div class="surah-frame">${ayah.surah.name}</div>`;
+                        if (ayah.surah.number !== 1 && ayah.surah.number !== 9) {
+                            if (rawText.startsWith('بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ')) {
+                                hasBismillah = true;
+                                rawText = rawText.replace(/^بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ\s*/, '');
+                                bismillahText = 'بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ';
+                            } else if (rawText.startsWith('بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ')) {
+                                hasBismillah = true;
+                                rawText = rawText.replace(/^بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ\s*/, '');
+                                bismillahText = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
+                            }
+                        }
+                    }
+
+                    if (hasBismillah) {
+                        html += `<div class="bismillah-box">${bismillahText}</div>`;
+                    }
+
+                    html += `<span id="ayah-node-${idx}" class="ayah-span" onclick="openAyahTafsir(${idx})">
+                                ${rawText} <span class="ayah-number">﴿${toArabic(ayah.numberInSurah)}﴾</span>
+                             </span> `;
+                });
+
+                document.getElementById('mushafText').innerHTML = html;
+                document.getElementById('pageLoader').classList.add('hidden');
+                window.scrollTo(0, 0);
+
+                // حفظ آخر صفحة تمت قراءتها تلقائياً
+                localStorage.setItem('quran_last_page', pageNum);
+                loadBookmarkInfo();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // ================= التلاوة والتكرار الممنهج =================
+        function toggleContinuousPlay() {
+            if (isPlaying) {
+                stopAudio();
+            } else {
+                isPlaying = true;
+                document.getElementById('playIcon').className = 'fas fa-pause';
+                playAyahAtIndex(currentAyahIndex);
+            }
+        }
+
+        function playAyahAtIndex(index) {
+            if (index >= pageAyahs.length) {
+                // الانتقال التلقائي للصفحة التالية عند انتهاء الصفحة الحالية
+                if (currentPage < 604) {
+                    changePage(-1);
+                    setTimeout(() => toggleContinuousPlay(), 800);
+                } else {
+                    stopAudio();
+                }
+                return;
+            }
+
+            currentAyahIndex = index;
+            highlightAyah(index);
+
+            const reciter = document.getElementById('reciterSelect').value;
+            const globalAyahNum = pageAyahs[index].number;
+            
+            document.getElementById('audioStatusText').innerText = `يتلو: ${pageAyahs[index].surah.name} (${pageAyahs[index].numberInSurah})`;
+            audioPlayer.src = `https://cdn.islamic.network/quran/audio/128/${reciter}/${globalAyahNum}.mp3`;
+            audioPlayer.play();
+        }
+
+        audioPlayer.onended = function() {
+            const maxRepeat = parseInt(document.getElementById('repeatSelect').value) || 1;
+            currentRepeatCount++;
+
+            if (currentRepeatCount < maxRepeat) {
+                // تكرار نفس الآية للحفظ
+                applyIntervalOrContinue(() => audioPlayer.play());
+            } else {
+                currentRepeatCount = 0;
+                applyIntervalOrContinue(() => playAyahAtIndex(currentAyahIndex + 1));
+            }
+        };
+
+        function applyIntervalOrContinue(callback) {
+            const isPauseEnabled = document.getElementById('pauseAfterAyah').checked;
+            if (isPauseEnabled) {
+                document.getElementById('subStatusText').innerText = 'مهلة الترديد للطالب...';
+                setTimeout(() => {
+                    document.getElementById('subStatusText').innerText = 'انقر على أي آية للتدبر';
+                    if (isPlaying) callback();
+                }, (audioPlayer.duration || 3) * 800); // مهلة تعادل تقريباً مدة الآية
+            } else {
+                if (isPlaying) callback();
+            }
+        }
+
+        function highlightAyah(index) {
+            document.querySelectorAll('.ayah-span').forEach(el => el.classList.remove('ayah-playing'));
+            const activeNode = document.getElementById(`ayah-node-${index}`);
+            if (activeNode) {
+                activeNode.classList.add('ayah-playing');
+                activeNode.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        function stopAudio() {
+            audioPlayer.pause();
+            isPlaying = false;
+            currentRepeatCount = 0;
+            document.getElementById('playIcon').className = 'fas fa-play';
+            document.getElementById('audioStatusText').innerText = 'التلاوة متوقفة';
+            document.getElementById('subStatusText').innerText = 'انقر على أي آية للتدبر';
+            document.querySelectorAll('.ayah-span').forEach(el => el.classList.remove('ayah-playing'));
+        }
+
+        function updateReciter() {
+            if (isPlaying) {
+                playAyahAtIndex(currentAyahIndex);
+            }
+        }
+
+        // ================= التدبر والتفسير الميسر =================
+        async function openAyahTafsir(index) {
+            activeModalAyah = pageAyahs[index];
+            document.getElementById('drawerSurahAyah').innerText = `${activeModalAyah.surah.name} - الآية ${activeModalAyah.numberInSurah}`;
+            document.getElementById('drawerContent').innerHTML = '<div class="loader"></div>';
+            
+            document.getElementById('drawerOverlay').classList.remove('hidden');
+            document.getElementById('tafsirDrawer').classList.add('active');
+
+            try {
+                const res = await fetch(`https://api.alquran.cloud/v1/ayah/${activeModalAyah.number}/ar.muyassar`);
+                const data = await res.json();
+                document.getElementById('drawerContent').innerHTML = `
+                    <p class="font-['Amiri_Quran'] text-xl text-[#0f4c3a] mb-3 p-3 bg-amber-50/60 rounded-xl leading-loose">
+                        ${activeModalAyah.text}
+                    </p>
+                    <p class="text-gray-800 leading-relaxed font-semibold">
+                        <i class="fas fa-book-open text-amber-600 ml-1"></i> ${data.data.text}
+                    </p>
+                `;
+            } catch (err) {
+                document.getElementById('drawerContent').innerHTML = '<p class="text-red-500">تعذر تحميل التفسير حالياً.</p>';
+            }
+        }
+
+        function closeDrawer() {
+            document.getElementById('drawerOverlay').classList.add('hidden');
+            document.getElementById('tafsirDrawer').classList.remove('active');
+        }
+
+        function playDrawerAyah() {
+            if (!activeModalAyah) return;
+            closeDrawer();
+            const idx = pageAyahs.findIndex(a => a.number === activeModalAyah.number);
+            if (idx !== -1) {
+                isPlaying = true;
+                document.getElementById('playIcon').className = 'fas fa-pause';
+                playAyahAtIndex(idx);
+            }
+        }
+
+        // ================= إدارة الختمة والفواصل =================
+        function saveCurrentBookmark() {
+            localStorage.setItem('quran_bookmark_page', currentPage);
+            alert(`تم حفظ الفاصل عند الصفحة (${currentPage}) بنجاح.`);
+            loadBookmarkInfo();
+        }
+
+        function resumeBookmark() {
+            const saved = localStorage.getItem('quran_bookmark_page') || localStorage.getItem('quran_last_page') || 1;
+            document.getElementById('indexScreen').classList.add('hidden');
+            document.getElementById('mushafScreen').classList.remove('hidden');
+            document.getElementById('audioBar').classList.remove('hidden');
+            loadPage(parseInt(saved));
+        }
+
+        function loadBookmarkInfo() {
+            const current = parseInt(localStorage.getItem('quran_bookmark_page') || localStorage.getItem('quran_last_page') || 1);
+            const percentage = ((current / 604) * 100).toFixed(1);
+            const label = document.getElementById('khatmahLabel');
+            if (label) {
+                label.innerText = `الصفحة ${current} من 604 (${percentage}%)`;
+            }
+        }
+
+        function changePage(direction) {
+            let newPage = direction === -1 ? currentPage + 1 : currentPage - 1;
+            loadPage(newPage);
+        }
+
+        function showIndex() {
+            stopAudio();
+            document.getElementById('mushafScreen').classList.add('hidden');
+            document.getElementById('audioBar').classList.add('hidden');
+            document.getElementById('indexScreen').classList.remove('hidden');
+            loadBookmarkInfo();
+        }
+
+        function toArabic(num) {
+            const arr = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+            return num.toString().split('').map(c => arr[c] || c).join('');
+        }
+
+        fetchSurahs();
+    </script>
+</body>
+</html>
