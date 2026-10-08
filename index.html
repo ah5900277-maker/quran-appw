@@ -115,7 +115,7 @@
         </div>
     </div>
 
-    <!-- شريط الصوت النظيف المضمون -->
+    <!-- شريط الصوت الجذري -->
     <div id="audioBar" class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 shadow-2xl p-3 z-40 hidden">
         <div class="max-w-2xl mx-auto flex flex-wrap items-center justify-between gap-2">
             <div class="flex items-center gap-2">
@@ -128,13 +128,15 @@
                 </div>
             </div>
             <div class="flex items-center flex-wrap gap-2 text-xs">
-                <!-- تم إزالة القراء المسببين للمشاكل، وإضافة أصوات ممتازة ونقية -->
+                <!-- المعرفات العالمية الدقيقة 100% -->
                 <select id="reciterSelect" onchange="updateReciter()" class="bg-gray-100 border border-gray-300 rounded-lg p-1.5 font-semibold text-gray-700 outline-none w-[140px]">
+                    <option value="ar.abdurrahmaansudais">عبد الرحمن السديس</option>
+                    <option value="ar.abdulbasitmurattal">عبد الباسط (مرتل)</option>
+                    <option value="ar.abdulsamad">عبد الباسط (مجود)</option>
+                    <option value="ar.mahermuaiqly">ماهر المعيقلي</option>
                     <option value="ar.alafasy">مشاري العفاسي</option>
-                    <option value="ar.hudhaify">علي الحذيفي</option>
                     <option value="ar.husary">محمود الحصري</option>
                     <option value="ar.minshawi">محمد المنشاوي</option>
-                    <option value="ar.abdullahbasfar">عبد الله بصفر</option>
                 </select>
 
                 <select id="repeatSelect" class="bg-gray-100 border border-gray-300 rounded-lg p-1.5 font-semibold text-gray-700 outline-none hidden sm:block">
@@ -218,6 +220,10 @@
         let allSurahs = [], currentPage = 1, pageAyahs = [], currentAyahIndex = 0, isPlaying = false, currentRepeatCount = 0, activeModalAyah = null;
         const audioPlayer = document.getElementById('audioPlayer');
 
+        // إجبار الصوت على أن يكون طبيعياً 100% دائماً بدون أي تسريع
+        audioPlayer.playbackRate = 1.0;
+        audioPlayer.defaultPlaybackRate = 1.0;
+
         async function fetchSurahs() {
             try {
                 const res = await fetch('https://api.alquran.cloud/v1/surah');
@@ -299,12 +305,14 @@
             if (activeNode) { activeNode.classList.add('ayah-playing'); activeNode.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
 
             const reciter = document.getElementById('reciterSelect').value;
+            // استخدام الترقيم العالمي (من 1 إلى 6236) لضمان الدقة المطلقة للسديس وعبدالباسط
             const globalAyahNum = pageAyahs[index].number; 
 
             document.getElementById('subStatusText').innerHTML = '<i class="fas fa-spinner fa-spin text-amber-500"></i> جاري التحميل...';
             
-            // استخدام رابط قوي وثابت بدون أي تعديل برمجي على الصوت
+            // استخدام رابط جودة 128 القياسي والموثوق جداً
             audioPlayer.src = `https://cdn.islamic.network/quran/audio/128/${reciter}/${globalAyahNum}.mp3`;
+            audioPlayer.playbackRate = 1.0; // تأكيد طبيعة الصوت للمعقيلي
             audioPlayer.play().catch(e => console.log("انتظار..."));
         }
 
@@ -340,6 +348,7 @@
             }
         };
 
+        // تم إيقاف القفز العشوائي هنا حلاً للمشكلة! لن يتخطى الآية إذا لم يحملها.
         audioPlayer.onerror = function() {
             if (isPlaying) {
                 stopAudio();
